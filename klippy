@@ -659,6 +659,14 @@ def main():
     
     config = load_config()
     
+    # Check if config file exists before proceeding with operations that require it
+    if (args.add or args.delete or args.sync) and not os.path.exists(CONFIG_FILE):
+        if RICH_AVAILABLE:
+            console.print("[bold red]ERROR:[/bold red] No configuration found. Please run [bold]--config[/bold] command first.")
+        else:
+            print("ERROR: No configuration found. Please run --config command first.")
+        return
+    
     # Handle delete operation
     if args.delete:
         delete_clippings_file(config)
