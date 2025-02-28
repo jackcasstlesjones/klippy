@@ -1,4 +1,4 @@
-# Klippy
+# klippy
 
 A sleek, efficient tool for converting Kindle highlights to Markdown files for Obsidian.
 
@@ -22,7 +22,7 @@ Klippy extracts your Kindle highlights and notes, organizing them into neatly fo
 
 ## Installation
 
-#### Clone Klippy Repository
+#### Clone Repository
 
 **Linux and Mac**
 
@@ -41,7 +41,7 @@ chmod +x ~/.config/klippy/klippy
 pip install rich
 ```
 
-### Make Klippy Available System-wide
+### Make klippy Available System-wide
 
 **Method 1: Add to PATH (Linux/Mac)**
 
@@ -89,10 +89,10 @@ sudo ln -s ~/.config/klippy/klippy /usr/local/bin/klippy
 
 ## Usage
 
-Start Klippy with one of the following commands:
+Start klippy with one of the following commands:
 
 ```bash
-# Configure Klippy settings
+# Configure klippy settings
 klippy --config
 ```
 
@@ -114,7 +114,7 @@ klippy --delete
 ## How It Works
 
 1. Connect your Kindle device to your computer
-2. Run Klippy with your preferred command
+2. Run klippy with your preferred command
 3. Klippy extracts highlights from "My Clippings.txt"
 4. Highlights are organized by book into separate Markdown files
 5. A Map of Content (MOC) file links all your books together
