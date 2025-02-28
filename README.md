@@ -41,7 +41,7 @@ chmod +x ~/.config/klippy/klippy
 pip install rich
 ```
 
-### Make klippy Available System-wide
+### Make Klippy Available System-wide
 
 **Method 1: Add to PATH (Linux/Mac)**
 
