@@ -12,7 +12,6 @@ Klippy extracts your Kindle highlights and notes, organizing them into neatly fo
 - **Markdown Conversion**: Transforms highlights into formatted Markdown
 - **Obsidian Integration**: Creates backlinks and a Map of Content (MOC)
 - **Rich UI**: Enhanced experience with progress indicators and colorful output (when Rich is installed)
-- **Flexible Configuration**: Customizable output directory and formatting options
 
 ## Prerequisites
 
@@ -47,6 +46,7 @@ pip install rich
 **Method 1: Add to PATH (Linux/Mac)**
 
 Option A: Using echo command:
+
 ```bash
 # For zsh users
 echo 'export PATH="$HOME/.config/klippy:$PATH"' >> ~/.zshrc
@@ -58,6 +58,7 @@ echo 'export PATH="$HOME/.config/klippy:$PATH"' >> ~/.bashrc
 ```
 
 Option B: Manual addition:
+
 1. Open your shell configuration file in a text editor:
    - For zsh: `nano ~/.zshrc` or `vim ~/.zshrc`
    - For bash: `nano ~/.bashrc` or `vim ~/.bashrc`
@@ -68,6 +69,7 @@ Option B: Manual addition:
 3. Save and close the file
 
 Apply changes to current session:
+
 ```bash
 # For zsh users
 source ~/.zshrc
