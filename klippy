@@ -28,10 +28,10 @@ CONFIG_FILE = os.path.join(CONFIG_DIR, 'config.json')
 OLD_CONFIG_FILE = os.path.expanduser('~/.klippy_config.json')
 print(f"Config file path: {CONFIG_FILE}")
 DEFAULT_CONFIG = {
-    'device_name': 'Kindle',
-    'dest_dir': os.path.expanduser('~/obsidian/jacks-vault/clippings'),
+    'device_name': '',
+    'dest_dir': '',
     'create_moc': True,
-    'moc_filename': 'moc-clippings'  # Without .md extension for consistency with link format
+    'moc_filename': ''  # Without .md extension for consistency with link format
 }
 
 # Load configuration
@@ -45,6 +45,9 @@ def load_config():
 
 def _load_config():
     print(f"Loading config from: {CONFIG_FILE}")
+    
+    # Start with the default configuration
+    config = DEFAULT_CONFIG.copy()
     
     # Check if we need to migrate from old location
     if not os.path.exists(CONFIG_FILE) and os.path.exists(OLD_CONFIG_FILE):
@@ -80,23 +83,25 @@ def _load_config():
         try:
             with open(CONFIG_FILE, 'r') as f:
                 user_config = json.load(f)
+                # Update the default config with user settings
+                config.update(user_config)
                 if RICH_AVAILABLE:
                     console.print("[green]Configuration loaded successfully[/green]")
                 else:
-                    print(f"Loaded config: {user_config}")
-                return user_config
+                    print(f"Loaded config: {config}")
+                return config
         except json.JSONDecodeError:
             if RICH_AVAILABLE:
-                console.print("[bold red]Error reading config file. Using empty configuration.[/bold red]")
+                console.print("[bold red]Error reading config file. Using default configuration.[/bold red]")
             else:
-                print(f"Error reading config file. Using empty configuration.")
-            return {}
+                print(f"Error reading config file. Using default configuration.")
+            return config
     else:
         if RICH_AVAILABLE:
-            console.print("[yellow]Config file does not exist yet. Will be created when saving.[/yellow]")
+            console.print("[yellow]Config file does not exist yet. Using default configuration.[/yellow]")
         else:
-            print(f"Config file does not exist yet. Will be created when saving.")
-    return {}
+            print(f"Config file does not exist yet. Using default configuration.")
+    return config
 
 # Save configuration
 def save_config(config):
@@ -156,13 +161,18 @@ def setup_config():
             border_style="blue"
         ))
         
-        # Only show the current config values in the prompt, no defaults
-        device_name = Prompt.ask(
-            "Enter device name", 
-            default=config.get('device_name', ''),
-            show_default=True
-        )
-        config['device_name'] = device_name
+        # Require device name
+        while True:
+            device_name = Prompt.ask(
+                "Enter device name", 
+                default=config.get('device_name', ''),
+                show_default=True if config.get('device_name') else False
+            )
+            if device_name:
+                config['device_name'] = device_name
+                break
+            else:
+                console.print("[bold red]Error:[/bold red] Device name is required.")
         
         # Keep asking for a valid destination directory
         valid_dest_dir = False
@@ -208,20 +218,37 @@ def setup_config():
         config['create_moc'] = create_moc
         
         if create_moc:
-            moc_filename = Prompt.ask(
-                "Enter MOC filename (without extension)", 
-                default=config.get('moc_filename', ''),
-                show_default=True
-            )
-            config['moc_filename'] = moc_filename
+            while True:
+                moc_filename = Prompt.ask(
+                    "Enter MOC filename (without extension)", 
+                    default=config.get('moc_filename', ''),
+                    show_default=True if config.get('moc_filename') else False
+                )
+                if moc_filename:
+                    config['moc_filename'] = moc_filename
+                    break
+                else:
+                    console.print("[bold red]Error:[/bold red] MOC filename is required when MOC creation is enabled.")
     else:
         print("Klippy Configuration Setup")
         print("=========================")
         
-        # Only show the current config values in the prompt, no defaults
-        device_name = input(f"Enter device name [{config.get('device_name', '')}]: ")
-        # Always update the config, even if the user just pressed Enter (use the current value)
-        config['device_name'] = device_name if device_name else config.get('device_name', '')
+        # Require device name
+        while True:
+            prompt = "Enter device name"
+            if config.get('device_name'):
+                prompt += f" [{config.get('device_name')}]"
+            prompt += ": "
+            
+            device_name = input(prompt)
+            if device_name:
+                config['device_name'] = device_name
+                break
+            elif config.get('device_name'):
+                # Keep existing value
+                break
+            else:
+                print("Error: Device name is required.")
         
         # Keep asking for a valid destination directory
         valid_dest_dir = False
@@ -261,9 +288,21 @@ def setup_config():
         config['create_moc'] = create_moc
         
         if create_moc:
-            moc_filename = input(f"Enter MOC filename (without extension) [{config.get('moc_filename', '')}]: ")
-            # Always update the config, even if the user just pressed Enter (use the current value)
-            config['moc_filename'] = moc_filename if moc_filename else config.get('moc_filename', '')
+            while True:
+                prompt = "Enter MOC filename (without extension)"
+                if config.get('moc_filename'):
+                    prompt += f" [{config.get('moc_filename')}]"
+                prompt += ": "
+                
+                moc_filename = input(prompt)
+                if moc_filename:
+                    config['moc_filename'] = moc_filename
+                    break
+                elif config.get('moc_filename'):
+                    # Keep existing value
+                    break
+                else:
+                    print("Error: MOC filename is required when MOC creation is enabled.")
     
     save_config(config)
     return config
@@ -439,6 +478,14 @@ def create_markdown_files(clippings, dest_dir, create_moc=True, moc_filename="")
 
 # Create a Map of Content (MOC) file
 def create_moc_file(filenames, dest_dir, moc_filename):
+    # No fallback - require user to specify moc_filename
+    if not moc_filename:
+        if RICH_AVAILABLE:
+            console.print("[bold red]Error:[/bold red] MOC filename not specified. Please run --config to set it.")
+        else:
+            print("Error: MOC filename not specified. Please run --config to set it.")
+        return
+        
     moc_filepath = os.path.join(dest_dir, f"{moc_filename}.md")
 
     if RICH_AVAILABLE:
@@ -472,9 +519,13 @@ def process_clippings(config, delete_source=False):
     if RICH_AVAILABLE:
         console.print(f"[bold]Looking for clippings at:[/bold]", clippings_file_path)
         console.print(f"[bold]Will save markdown files to:[/bold]", dest_dir)
+        if create_moc:
+            console.print(f"[bold]Will create MOC file:[/bold] {moc_filename}.md")
     else:
         print(f"Looking for clippings at: {clippings_file_path}")
         print(f"Will save markdown files to: {dest_dir}")
+        if create_moc:
+            print(f"Will create MOC file: {moc_filename}.md")
     
     if not os.path.exists(clippings_file_path):
         if RICH_AVAILABLE:
@@ -499,8 +550,12 @@ def process_clippings(config, delete_source=False):
         if RICH_AVAILABLE:
             with console.status("[bold green]Creating markdown files...", spinner="dots"):
                 create_markdown_files(clippings, dest_dir, create_moc, moc_filename)
+            if create_moc and moc_filename:
+                console.print(f"[bold green]Created MOC file:[/bold green] {moc_filename}.md")
         else:
             create_markdown_files(clippings, dest_dir, create_moc, moc_filename)
+            if create_moc and moc_filename:
+                print(f"Created MOC file: {moc_filename}.md")
         
         if delete_source:
             try:
@@ -530,7 +585,6 @@ def process_clippings(config, delete_source=False):
             print("No clippings found to process.")
         return False
 
-# Main function
 # Delete clippings file without processing
 def delete_clippings_file(config):
     device_name = config.get('device_name', '')
