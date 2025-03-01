@@ -28,7 +28,7 @@ Klippy extracts your Kindle highlights and notes, organizing them into neatly fo
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/klippy.git ~/.config/klippy
+git clone https://github.com/jackcasstlesjones/klippy.git ~/.config/klippy
 ```
 
 ```bash
