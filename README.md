@@ -1,5 +1,7 @@
 # klippy
 
+![Screenshot 2025-05-19 at 11 42 49](https://github.com/user-attachments/assets/287666a1-8a7e-4f2c-a2f8-e5be5960d00f)
+
 A sleek, efficient tool for converting Kindle highlights to Markdown files for Obsidian.
 
 ## Overview
